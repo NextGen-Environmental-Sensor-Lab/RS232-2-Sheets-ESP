@@ -25,7 +25,7 @@ void handlePRoot() {
   server.send(200, "text/html", webpage_html);
 }
 
-// when send info from webpage run this
+// when webpage sends info on clicking submit, run this
 void handleProvision() {
 
   // save settings in structure 'settings'
@@ -39,13 +39,14 @@ void handleProvision() {
 
   server.send(200, "text/html", "<p>Provision successful. To join ssid: " + String(settings.saved_ssid) + " exit Access Point</p>");
 
-  WiFi.softAPdisconnect(true);
+  WiFi.softAPdisconnect(true); // kick anyone on the AP off to exit loop
   delay(500);
   Serial.printf("Client disconnected\n");
   server.close();  //????????????????????
   delay(500);
 }
 
+// Will try to connect to Wifi and if it can't it will go into provisioning
 void connectToWifi() {
 
   bool firstTry = true;
@@ -74,7 +75,7 @@ void connectToWifi() {
         Serial.print("IP address: ");
         Serial.println(WiFi.localIP());
         if (!firstTry)
-          // if it wasn't on first try we entered new settings so save them
+          // if it wasn't on first try we entered new settings so save them to eeprom
           storeStruct(&settings, sizeof(settings));
         break;
 
@@ -89,13 +90,12 @@ void connectToWifi() {
     firstTry = false;
     // if we get here we enter provisioning mode
     APprovision();
-
     delay(1000);
   }
 }
 
 // Access Point provisioning. Makes AP, when client connected serves a simple webpage
-// to get settings. Must exit AP to continue.
+// to get settings. 
 void APprovision() {
 
   // makes a unique ssid for the ap with the id of the chip
@@ -112,14 +112,15 @@ void APprovision() {
 
   // set up server
   server.on("/", handlePRoot);                          // go here when conencted
-  server.on("/provision", HTTP_POST, handleProvision);  // go here when submitted
+  server.on("/provision", HTTP_POST, handleProvision);  // go here when info submitted
+  
   server.begin();
   Serial.println("HTTP server started");
 
   if (!WiFi.softAPgetStationNum())
     Serial.printf("no one connected\n");
 
-  // wait for someone to connect to ap
+  // wait for someone to connect to AP with slow blink
   while (!WiFi.softAPgetStationNum()) {
     Serial.printf("_");
     digitalWrite(LED_BUILTIN, LOW);
@@ -130,7 +131,7 @@ void APprovision() {
   }
 
   // someone connected now go to a browser and enter the IP
-  Serial.printf("\nConnected to AP! Go to ");
+  Serial.printf("\nConnected to AP! In a browser go to ");
   Serial.println(myIP);
 
   if (WiFi.softAPgetStationNum())
@@ -140,29 +141,28 @@ void APprovision() {
     server.handleClient();
     Serial.printf("_");
     digitalWrite(LED_BUILTIN, LOW);
-    delay(500);
+    delay(300);
     Serial.printf("|");
     digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-    delay(500);
+    delay(800);
   }
   delay(1000);
 }
 
-// gives you 15s to connect to ssid:csl-clearEEPROM to force provisioning
+// gives you 15s to connect to ssid: csl-clearEEPROM to force provisioning
 void clearSettings() {
 
   String ssid = makeMACssidAP("csl-clearEEPROM-");  // unique ssid with cleareeprom in it
   Serial.printf("Connect to ssid %s in <10s to clear EEPROM\n", ssid.c_str());
   WiFi.softAP(ssid);
-  //IPAddress myIP = WiFi.softAPIP();
 
-  // wait for someone to join ap
+  // wait for someone to join ap with fast blink
   int startTime = millis();
   while ((!WiFi.softAPgetStationNum()) && (millis() - startTime <= 15000)) {
     digitalWrite(LED_BUILTIN, LOW);
-    delay(100);                       // Wait for a second
-    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-    delay(100);                       // Wait for two seconds (to demonstrate the active low LED)
+    delay(100);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
   }
   // if we didn't timeout then erase eeprom
   if (WiFi.softAPgetStationNum()) {
@@ -214,7 +214,6 @@ void storeStruct(void *data_source, size_t size) {
   }
   EEPROM.commit();
 }
-
 // Read from eeprom into struct
 void loadStruct(void *data_dest, size_t size) {
   EEPROM.begin(size * 2);
