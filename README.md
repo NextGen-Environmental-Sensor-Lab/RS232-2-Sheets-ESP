@@ -14,4 +14,6 @@
 
 ![this is the circuit](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/RS232-2-Sheets-ESP.svg)
 
-NGENS LAB, ASRC ESI GC CUNY. Ricardo Toledo-Crow 2023
+![enter image description here](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/IMG_1954.jpeg)
+
+
