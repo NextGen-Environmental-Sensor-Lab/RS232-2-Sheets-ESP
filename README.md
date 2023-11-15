@@ -6,15 +6,13 @@
  - Device I made uses a Wemos D1 Mini and a MAX3232 for rs232-to-3.3v
    logic translation.
  - Will prob work fine with any ESP board. 
- - It will has a settings provisioning mode for WiFi SSID and PASSCODE, and GOOGLESCRIPT_ID through
+ - It has a settings provisioning mode for WiFi SSID and PASSCODE, and GOOGLESCRIPT_ID through
    an Access Point and a simple Web Server
  - It will save setting in EEPROM
  - It uses a Google Script deployed to get the data through HTTP and put into the Google Sheet. See file *.gs.
  - Much of this comes from https://github.com/electronicsguy/HTTPSRedirect
 
-
-
-![circuit sketch](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/RS232-2-Sheets-ESP.pdf)
+![device sketch](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/RS232-2-Sheets-ESP.svg)
 
 ![actual device in action](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/IMG_1954.jpeg)
 
