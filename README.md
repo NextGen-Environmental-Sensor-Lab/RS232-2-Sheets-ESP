@@ -12,8 +12,10 @@
  - It uses a Google Script deployed to get the data through HTTP and put into the Google Sheet. See file *.gs.
  - Much of this comes from https://github.com/electronicsguy/HTTPSRedirect
 
-![this is the circuit](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/RS232-2-Sheets-ESP.pdf)
 
-![enter image description here](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/IMG_1954.jpeg)
+
+![circuit sketch](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/RS232-2-Sheets-ESP.pdf)
+
+![actual device in action](https://github.com/NextGen-Environmental-Sensor-Lab/RS232-2-Sheets-ESP/blob/main/IMG_1954.jpeg)
 
 
