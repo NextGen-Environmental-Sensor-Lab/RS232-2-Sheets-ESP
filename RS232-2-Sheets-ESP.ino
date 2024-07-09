@@ -28,7 +28,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  delay(10000);
+  delay(8000);
   Serial.println();
   Serial.println(__FILE__);
 
