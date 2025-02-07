@@ -62,15 +62,19 @@ void loop() {
   while (swSerial.available() > 0) {  // if data from rs232 available get it
     tmpr = swSerial.read();
     rs232Buffer[indx++] = tmpr;
-    Serial.write(tmpr);  // put it to serial monitor
+    Serial.print(tmpr, HEX);  // put it to serial monitor
+    Serial.print(", ");
     delay(10);
   }
 
-  if (tmpr == 0x0A) {           // if end of line from rs232 send to Google Sheets
+  if (tmpr == 0x0A || tmpr == 0x0D || tmpr == 0x03) {  // if end of line from rs232 send to Google Sheets
+
     rs232Buffer[indx - 2] = 0;  // terminate as c string with a zero
 
-    Serial.println("POST: append data to spreadsheet:");
+    Serial.println("\nPOST: append data to spreadsheet:");
     payload = payload_prefix + String(rs232Buffer) + payload_suffix;
+
+    Serial.println(payload);
 
     indx = 0;
     while (!client->connected()) {
@@ -79,7 +83,7 @@ void loop() {
       client = nullptr;
       clientConnect();
       delay(1000);
-      if (indx++ > 3) // try 3 times
+      if (indx++ > 3)  // try 3 times
         break;
     };
 
@@ -95,6 +99,7 @@ void loop() {
     char tmpt = Serial.read();
     if (tmpt == 0x0A)
       swSerial.write(0x0D);
-    swSerial.write(tmpt);  // send it to rs232
+    else
+      swSerial.write(tmpt);  // send it to rs232
   }
 }
