@@ -28,7 +28,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  delay(10000);
+  delay(8000);
   Serial.println();
   Serial.println(__FILE__);
 
@@ -55,53 +55,51 @@ void setup() {
 }
 
 void loop() {
-  static int error_count = 0;
-  static bool flag = false;
-  static char rs232Buffer[128] = "";
-  static int indx = 0;
-  static char tmpr = 0x00;
+  char rs232Buffer[128] = "";
+  int indx = 0;
+  char tmpr = 0x00;
 
   while (swSerial.available() > 0) {  // if data from rs232 available get it
     tmpr = swSerial.read();
     rs232Buffer[indx++] = tmpr;
-    Serial.write(tmpr);  // put it to serial monitor
+    Serial.print(tmpr, HEX);  // put it to serial monitor
+    Serial.print(", ");
+    delay(10);
   }
 
-  if (tmpr == 0x0A) {           // if end of line from rs232 send to gsheets
+  if (tmpr == 0x0A || tmpr == 0x0D || tmpr == 0x03) {  // if end of line from rs232 send to Google Sheets
+
     rs232Buffer[indx - 2] = 0;  // terminate as c string with a zero
-    indx = 0;
-    tmpr = 0;
 
-    if (flag) {  // if we had to reconnect, add that to the string to upload to gsheets
-      strncat(rs232Buffer, ",reconnected", 12);
-      flag = false;
-    }
-
-    Serial.println("POST append memory data to spreadsheet:");
+    Serial.println("\nPOST: append data to spreadsheet:");
     payload = payload_prefix + String(rs232Buffer) + payload_suffix;
-    if (!client->POST(url, host, payload)) {  // POST to gscript
-      Serial.printf("Error-count while connecting: %u\n", ++error_count);
-    }
 
-    if (error_count > 3) {  // after 3 errors reconnect
-      flag = true;
-      Serial.println("Reconnecting to host");
+    Serial.println(payload);
+
+    indx = 0;
+    while (!client->connected()) {
+      Serial.println("reconnecting to host...");
       delete client;
       client = nullptr;
-      if (!clientConnect()) {  // if cant connect goto sleep
-        Serial.printf("Going to sleep\n");
-        ESP.deepSleep(0);
-      } else {
-        error_count = 0;
-      }
+      clientConnect();
+      delay(1000);
+      if (indx++ > 3)  // try 3 times
+        break;
+    };
+
+    if (!client->POST(url, host, payload)) {
+      Serial.println("Error connecting to host");
+      ESP.restart();  // reboot the system
+      // while(1); // lock the system
     }
   }
 
-  // we can also send data to the rs232 device
+  // we also send data to the rs232 device if available
   while (Serial.available() > 0) {  // if data avail from serial monitor get it
     char tmpt = Serial.read();
     if (tmpt == 0x0A)
       swSerial.write(0x0D);
-    swSerial.write(tmpt);  // send it to rs232
+    else
+      swSerial.write(tmpt);  // send it to rs232
   }
 }

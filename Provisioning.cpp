@@ -35,11 +35,11 @@ void handleProvision() {
 
   Serial.printf("\nhandleProvision\nssid: %s\n", settings.saved_ssid);
   Serial.printf("passcode: %s\n", settings.saved_passcode);
-  Serial.printf("ssid: %s\n", settings.saved_gsid);
+  Serial.printf("gsid: %s\n", settings.saved_gsid);
 
   server.send(200, "text/html", "<p>Provision successful. To join ssid: " + String(settings.saved_ssid) + " exit Access Point</p>");
 
-  WiFi.softAPdisconnect(true); // kick anyone on the AP off to exit loop
+  WiFi.softAPdisconnect(true);  // kick anyone on the AP off to exit loop
   delay(500);
   Serial.printf("Client disconnected\n");
   server.close();  //????????????????????
@@ -95,7 +95,7 @@ void connectToWifi() {
 }
 
 // Access Point provisioning. Makes AP, when client connected serves a simple webpage
-// to get settings. 
+// to get settings.
 void APprovision() {
 
   // makes a unique ssid for the ap with the id of the chip
@@ -113,7 +113,7 @@ void APprovision() {
   // set up server
   server.on("/", handlePRoot);                          // go here when conencted
   server.on("/provision", HTTP_POST, handleProvision);  // go here when info submitted
-  
+
   server.begin();
   Serial.println("HTTP server started");
 
@@ -299,8 +299,10 @@ bool clientConnect() {
     if (retval == 1) {
       flag = true;
       break;
-    } else
-      Serial.println("Connection failed. Retrying...");
+    } else {
+      Serial.printf("Connection failed. Retrying... return value %d\n",retval);
+      delay(200);
+    }
   }
   if (!flag) {
     Serial.printf("Could not connect to server: %s\n Exiting...\n", host);
